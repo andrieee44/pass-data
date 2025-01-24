@@ -1,0 +1,26 @@
+.TH pass-data 1
+.SH NAME
+pass-data \- pass extension for decrypting data for use in external programs.
+.SH SYNOPSIS
+.B pass data 
+.I DIRECTORY PROGRAM
+.SH DESCRIPTION
+.B pass data
+is a pass extension, originally designed to work with
+.IR calcurse (1)
+using calendar data managed by
+.IR pass (1).
+.B pass data
+temporarily decrypts the data and makes it available to the program with the environment variable
+.B $PASS_DATA
+and reencrypts it after the program is finished executing.
+.SH EXAMPLE
+.TP
+.RI Run " calcurse" (1):
+.EX
+.B $ pass data calendar \(aqcalcurse -D \(dq$PASS_DATA\(dq\(aq
+.EE
+.SH SEE ALSO
+.IR pass "(1), " calcurse (1)
+.SH AUTHOR
+andrieee44 (andrieee44@gmail.com)
