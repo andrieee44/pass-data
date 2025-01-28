@@ -34,7 +34,7 @@ cmd_data_exec() {
 		$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passFile" "${GPG_OPTS[@]}" "$tmpFile" || exit 1
 	done
 
-	git_add_file "$fullPath" "Update data in ${path} using ${2}."
+	git_add_file "$fullPath" "Update data in ${path}."
 }
 
 cmd_data_exec "$@"
