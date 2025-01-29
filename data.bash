@@ -26,7 +26,7 @@ cmd_data_exec() {
 		file="${file#"${PREFIX}/${path}/"}"
 		file="${file%.gpg}"
 
-		mkdir -p "${tmpPath}/${file%/*}"
+		mkdir -p "$(dirname "${tmpPath}/${file}")"
 		$GPG -d -o "${tmpPath}/${file}" "${GPG_OPTS[@]}" "${PREFIX}/${path}/${file}.gpg" || exit 1
 	done
 
@@ -40,7 +40,7 @@ cmd_data_exec() {
 		tmpFile="${tmpPath}/${file}"
 
 		[ -f "$passFile" ] && $GPG -d -o - "${GPG_OPTS[@]}" "$passFile" 2>/dev/null | diff - "$tmpFile" >/dev/null 2>&1 && continue
-		mkdir -p "${passFile%/*}"
+		mkdir -p "$(dirname "$passFile")"
 		$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passFile" "${GPG_OPTS[@]}" "$tmpFile" || exit 1
 	done
 
