@@ -26,7 +26,7 @@ cmd_data_exec() {
 		file="${file#"${PREFIX}/${path}/"}"
 		file="${file%.gpg}"
 
-		mkdir -p "${file%/*}"
+		mkdir -p "${tmpPath}/${file%/*}"
 		$GPG -d -o "${tmpPath}/${file}" "${GPG_OPTS[@]}" "${PREFIX}/${path}/${file}.gpg" || exit 1
 	done
 
