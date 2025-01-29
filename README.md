@@ -16,7 +16,7 @@ programs.
 
 ## SYNOPSIS <span id="SYNOPSIS"></span>
 
-**pass data** *DIRECTORY PROGRAM*
+**pass data** *DIRECTORY PROGRAM ARGS ...*
 
 ## DESCRIPTION <span id="DESCRIPTION"></span>
 
@@ -30,7 +30,7 @@ program is finished executing.
 
 Run *calcurse*(1):
 
-**\$ pass data calendar 'calcurse -D "\$PASS_DATA"'**
+**\$ pass data calendar calcurse -D '"\$PASS_DATA"'**
 
 ## SEE ALSO <span id="SEE ALSO"></span>
 

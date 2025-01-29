@@ -1,8 +1,8 @@
 #! /usr/bin/env bash
 
 cmd_data_exec() {
-	[ "$#" -ne 2 ] && {
-		echo "usage: ${PROGRAM} data <DIRECTORY> <PROGRAM>" >&2
+	[ "$#" -lt 2 ] && {
+		echo "usage: ${PROGRAM} data <DIRECTORY> <PROGRAM> ARGS ..." >&2
 		exit 1
 	}
 
@@ -24,7 +24,9 @@ cmd_data_exec() {
 		$GPG -d -o "${tmpPath}/${file}" "${GPG_OPTS[@]}" "${PREFIX}/${path}/${file}.gpg" || exit 1
 	done
 
-	PASS_DATA="$tmpPath" eval "$2"
+	program="$2"
+	shift 2
+	PASS_DATA="$tmpPath" eval "$program" "$@"
 
 	find "$tmpPath" -type f | while read -r file; do
 		file="${file#"${tmpPath}/"}"

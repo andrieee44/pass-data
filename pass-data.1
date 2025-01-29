@@ -3,7 +3,7 @@
 pass-data \- pass extension for decrypting data for use in external programs.
 .SH SYNOPSIS
 .B pass data 
-.I DIRECTORY PROGRAM
+.I DIRECTORY PROGRAM ARGS ...
 .SH DESCRIPTION
 .B pass data
 is a pass extension, originally designed to work with
@@ -18,7 +18,7 @@ and reencrypts it after the program is finished executing.
 .TP
 .RI Run " calcurse" (1):
 .EX
-.B $ pass data calendar \(aqcalcurse -D \(dq$PASS_DATA\(dq\(aq
+.B $ pass data calendar calcurse -D \(aq\(dq$PASS_DATA\(dq\(aq
 .EE
 .SH SEE ALSO
 .IR pass "(1), " calcurse (1)
