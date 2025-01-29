@@ -30,9 +30,9 @@ cmd_data_exec() {
 		$GPG -d -o "${tmpPath}/${file}" "${GPG_OPTS[@]}" "${PREFIX}/${path}/${file}.gpg" || exit 1
 	done
 
-	program="$2"
+	prog="$2"
 	shift 2
-	PASS_DATA="$tmpPath" eval "$program" "$@"
+	PASS_DATA="$tmpPath" eval "$prog ${*}"
 
 	find "$tmpPath" -type f | while read -r file; do
 		file="${file#"${tmpPath}/"}"
