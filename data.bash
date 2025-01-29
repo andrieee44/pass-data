@@ -7,13 +7,17 @@ cmd_data_exec() {
 	}
 
 	path="${1%/}"
+
 	check_sneaky_paths "$path"
+
 	fullPath="${PREFIX}/${path}"
 
 	[ -f "${fullPath}.gpg" ] && die "must be a directory"
 
 	tmpdir
+
 	tmpPath="${SECURE_TMPDIR}/${path}"
+
 	mkdir -p "$fullPath" "$tmpPath"
 	set_gpg_recipients "$path"
 	set_git "$fullPath"
@@ -21,6 +25,7 @@ cmd_data_exec() {
 	find "$fullPath" -type f | while read -r file; do
 		file="${file#"${PREFIX}/${path}/"}"
 		file="${file%.gpg}"
+
 		$GPG -d -o "${tmpPath}/${file}" "${GPG_OPTS[@]}" "${PREFIX}/${path}/${file}.gpg" || exit 1
 	done
 
@@ -32,7 +37,9 @@ cmd_data_exec() {
 		file="${file#"${tmpPath}/"}"
 		passFile="${PREFIX}/${path}/${file}.gpg"
 		tmpFile="${tmpPath}/${file}"
+
 		[ -f "$passFile" ] && $GPG -d -o - "${GPG_OPTS[@]}" "$passFile" 2>/dev/null | diff - "$tmpFile" >/dev/null 2>&1 && continue
+		mkdir -p "${passFile%/*}"
 		$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passFile" "${GPG_OPTS[@]}" "$tmpFile" || exit 1
 	done
 
