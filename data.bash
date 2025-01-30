@@ -1,50 +1,48 @@
 #! /usr/bin/env bash
 
 cmd_data_exec() {
+	set -eo pipefail
+
 	[ "$#" -lt 2 ] && {
 		echo "usage: ${PROGRAM} data <DIRECTORY> <PROGRAM> ARGS ..." >&2
 		exit 1
 	}
 
 	path="${1%/}"
-
 	check_sneaky_paths "$path"
-
-	fullPath="${PREFIX}/${path}"
-
-	[ -f "${fullPath}.gpg" ] && die "must be a directory"
-
+	passTar="${PREFIX}/${path}.gpg"
+	passTarDir="$(dirname -- "$passTar")"
+	mkdir -p -- "$passTarDir"
+	set_gpg_recipients "$passTarDir"
+	set_git "$passTar"
 	tmpdir
+	tmpPath="${SECURE_TMPDIR}/$(basename -- "${passTar%.gpg}")"
+	tmpTar="${tmpPath}.tar"
+	tmpTarGz="${tmpTar}.gz"
+	mkdir -p -- "$tmpPath"
 
-	tmpPath="${SECURE_TMPDIR}/${path}"
-
-	mkdir -p "$fullPath" "$tmpPath"
-	set_gpg_recipients "$path"
-	set_git "$fullPath"
-
-	find "$fullPath" -type f | while read -r file; do
-		file="${file#"${PREFIX}/${path}/"}"
-		file="${file%.gpg}"
-
-		mkdir -p "$(dirname "${tmpPath}/${file}")"
-		$GPG -d -o "${tmpPath}/${file}" "${GPG_OPTS[@]}" "${PREFIX}/${path}/${file}.gpg" || exit 1
-	done
+	[ -f "$passTar" ] && {
+		$GPG -d -o "$tmpTarGz" "${GPG_OPTS[@]}" "$passTar" || exit 1
+		gzip -d "$tmpTarGz" || exit 1
+		sumA="$(tarsum <"$tmpTar")" || exit 1
+		tar -xf "$tmpTar" -C "$tmpPath" || exit 1
+	}
 
 	prog="$2"
 	shift 2
-	PASS_DATA="$tmpPath" eval "$prog ${*}"
+	PASS_DATA="$tmpPath" eval "${prog} ${*}"
 
-	find "$tmpPath" -type f | while read -r file; do
-		file="${file#"${tmpPath}/"}"
-		passFile="${PREFIX}/${path}/${file}.gpg"
-		tmpFile="${tmpPath}/${file}"
+	tmpTar2="$(dirname "$tmpTar")/tmp.$(basename "$tmpTar")"
 
-		[ -f "$passFile" ] && $GPG -d -o - "${GPG_OPTS[@]}" "$passFile" 2>/dev/null | diff - "$tmpFile" >/dev/null 2>&1 && continue
-		mkdir -p "$(dirname "$passFile")"
-		$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passFile" "${GPG_OPTS[@]}" "$tmpFile" || exit 1
-	done
+	tar -cf "$tmpTar2" -C "$tmpPath" . 2>/dev/null || exit 1
+	sumB="$(tarsum <"$tmpTar2")" || exit 1
+	gzip "$tmpTar2" || exit 1
 
-	git_add_file "$fullPath" "Update data in ${path}."
+	[ -f "$passTar" ] && [ "$sumA" = "$sumB" ] && return
+
+	$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passTar" "${GPG_OPTS[@]}" "${tmpTar2}.gz" || exit 1
+
+	git_add_file "$passTar" "Update data in ${path}."
 }
 
 cmd_data_exec "$@"

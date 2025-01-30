@@ -16,7 +16,7 @@ programs.
 
 ## SYNOPSIS <span id="SYNOPSIS"></span>
 
-**pass data** *DIRECTORY PROGRAM ARGS ...*
+**pass data** *PATH PROGRAM ARGS ...*
 
 ## DESCRIPTION <span id="DESCRIPTION"></span>
 
