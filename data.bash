@@ -34,7 +34,7 @@ cmd_data_exec() {
 
 	tmpTar2="$(dirname "$tmpTar")/tmp.$(basename "$tmpTar")"
 
-	tar -cf "$tmpTar2" -C "$tmpPath" . 2>/dev/null || exit 1
+	tar -cf "$tmpTar2" -C "$tmpPath" . || exit 1
 	sumB="$(tarsum <"$tmpTar2")" || exit 1
 	gzip "$tmpTar2" || exit 1
 
