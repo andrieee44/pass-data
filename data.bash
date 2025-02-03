@@ -11,36 +11,34 @@ cmd_data_exec() {
 	path="${1%/}"
 	check_sneaky_paths "$path"
 	passTar="${PREFIX}/${path}.gpg"
-	passTarDir="$(dirname -- "$passTar")"
+	passTarDir="${passTar%"/${path}.gpg"}"
+	passName="${passTar%.gpg}"
+	passName="${passName##*/}"
 	mkdir -p -- "$passTarDir"
 	set_gpg_recipients "$passTarDir"
 	set_git "$passTar"
 	tmpdir
-	tmpPath="${SECURE_TMPDIR}/$(basename -- "${passTar%.gpg}")"
-	tmpTar="${tmpPath}.tar"
-	tmpTarGz="${tmpTar}.gz"
-	mkdir -p -- "$tmpPath"
+	tmpPath="${SECURE_TMPDIR}/${passName}"
+	tmpTar="${tmpPath}.tar.gz"
+	tmpPath2="${SECURE_TMPDIR}/old.${passName}"
+	tmpTar2="${tmpPath2}.tar.gz"
+	mkdir -p -- "${tmpPath}" "$tmpPath2"
 
 	[ -f "$passTar" ] && {
-		$GPG -d -o "$tmpTarGz" "${GPG_OPTS[@]}" "$passTar" || exit 1
-		gzip -d "$tmpTarGz" || exit 1
-		sumA="$(tarsum <"$tmpTar")" || exit 1
-		tar -xf "$tmpTar" -C "$tmpPath" || exit 1
+		$GPG -d -o "$tmpTar" "${GPG_OPTS[@]}" "$passTar" || exit 1
+		tar -xzf "$tmpTar" -C "$tmpPath" || exit 1
+		cp -rf "$tmpPath/." "$tmpPath2" || exit 1
 	}
 
 	prog="$2"
 	shift 2
 	PASS_DATA="$tmpPath" eval "${prog} ${*}"
 
-	tmpTar2="$(dirname "$tmpTar")/tmp.$(basename "$tmpTar")"
+	[ -f "$passTar" ] && diff -r "$tmpPath" "$tmpPath2" 2>/dev/null && return
 
-	tar -cf "$tmpTar2" -C "$tmpPath" . || exit 1
-	sumB="$(tarsum <"$tmpTar2")" || exit 1
-	gzip "$tmpTar2" || exit 1
+	tar -czf "$tmpTar2" -C "$tmpPath" . || exit 1
 
-	[ -f "$passTar" ] && [ "$sumA" = "$sumB" ] && return
-
-	$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passTar" "${GPG_OPTS[@]}" "${tmpTar2}.gz" || exit 1
+	$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passTar" "${GPG_OPTS[@]}" "${tmpTar2}" || exit 1
 
 	git_add_file "$passTar" "Update data in ${path}."
 }
