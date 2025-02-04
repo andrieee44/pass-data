@@ -34,7 +34,7 @@ prog="$2"
 shift 2
 PASS_DATA="$tmpPath" eval "${prog} ${*}"
 
-[ -f "$passTar" ] && diff -r "$tmpPath" "$tmpPath2" 2>/dev/null && return
+[ -f "$passTar" ] && diff -r "$tmpPath" "$tmpPath2" >/dev/null 2>&1  && return
 
 tar -cf "$tmpTar2" -C "$tmpPath" .
 gzip "$tmpTar2"
