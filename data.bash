@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-set -euo pipefail
+set -eo pipefail
 
 [ "$#" -lt 2 ] && {
 	echo "usage: ${PROGRAM} data <DIRECTORY> <PROGRAM> ARGS ..." >&2
