@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-set -eo pipefail
+set -euo pipefail
 
 [ "$#" -lt 2 ] && {
 	echo "usage: ${PROGRAM} data <DIRECTORY> <PROGRAM> ARGS ..." >&2
@@ -24,10 +24,10 @@ tmpTar2="${tmpPath2}.tar"
 mkdir -p -- "$tmpPath" "$tmpPath2"
 
 [ -f "$passTar" ] && {
-	$GPG -d -o "$tmpTar" "${GPG_OPTS[@]}" "$passTar" || exit 1
-	gzip -d "$tmpTar" || exit 1
-	tar -xf "${tmpTar%.gz}" -C "$tmpPath" || exit 1
-	cp -rf "$tmpPath/." "$tmpPath2" || exit 1
+	$GPG -d -o "$tmpTar" "${GPG_OPTS[@]}" "$passTar"
+	gzip -d "$tmpTar"
+	tar -xf "${tmpTar%.gz}" -C "$tmpPath"
+	cp -rf "$tmpPath/." "$tmpPath2"
 }
 
 prog="$2"
@@ -36,9 +36,9 @@ PASS_DATA="$tmpPath" eval "${prog} ${*}"
 
 [ -f "$passTar" ] && diff -r "$tmpPath" "$tmpPath2" 2>/dev/null && return
 
-tar -cf "${tmpTar2}" -C "$tmpPath" . || exit 1
-gzip "$tmpTar2" || exit 1
+tar -cf "$tmpTar2" -C "$tmpPath" .
+gzip "$tmpTar2"
 
-$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passTar" "${GPG_OPTS[@]}" "${tmpTar2}.gz" || exit 1
+$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passTar" "${GPG_OPTS[@]}" "${tmpTar2}.gz"
 
 git_add_file "$passTar" "Update data in ${path}."
