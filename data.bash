@@ -25,7 +25,8 @@ mkdir -p -- "${tmpPath}" "$tmpPath2"
 
 [ -f "$passTar" ] && {
 	$GPG -d -o "$tmpTar" "${GPG_OPTS[@]}" "$passTar" || exit 1
-	tar -xzf "$tmpTar" -C "$tmpPath" || exit 1
+	gzip -d "$tmpTar" || exit 1
+	tar -xf "${tmpTar%.gz}" -C "$tmpPath" || exit 1
 	cp -rf "$tmpPath/." "$tmpPath2" || exit 1
 }
 
@@ -35,7 +36,8 @@ PASS_DATA="$tmpPath" eval "${prog} ${*}"
 
 [ -f "$passTar" ] && diff -r "$tmpPath" "$tmpPath2" 2>/dev/null && return
 
-tar -czf "$tmpTar2" -C "$tmpPath" . || exit 1
+tar -cf "${tmpTar2%.gz}" -C "$tmpPath" . || exit 1
+gzip "$tmpTar2" || exit 1
 
 $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passTar" "${GPG_OPTS[@]}" "${tmpTar2}" || exit 1
 
