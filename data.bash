@@ -35,8 +35,8 @@ shift 2
 PASS_DATA="$tmpPath" eval "${prog} ${*}"
 
 [ -f "$passTar" ] && {
-	which diff || exit 1
-	diff -r -- "$tmpPath" "$tmpPath2" && exit 0
+	which diff >/dev/null 2>&1 || exit 1
+	diff -r -- "$tmpPath" "$tmpPath2" >/dev/null 2>&1 && exit 0
 }
 
 tar -cf "$tmpTar2" -C "$tmpPath" -- . || exit 1
